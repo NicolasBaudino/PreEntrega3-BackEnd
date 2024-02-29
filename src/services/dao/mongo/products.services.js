@@ -22,7 +22,7 @@ export default class productsDAO {
     }
     
     updateProducts = async (_id, product) => {
-        return await productModel.findOneAndUpdate({ _id }, product)
+        return await productModel.findByIdAndUpdate(_id, product)
     }
     
     deleteProducts = async (_id) => {

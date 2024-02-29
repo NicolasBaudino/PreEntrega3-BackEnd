@@ -14,7 +14,8 @@ router.get("/githubcallback", passport.authenticate('github', { failureRedirect:
 async (req, res) => {
     const user = req.user;
     req.session.user = {
-        name: `${user.first_name} ${user.last_name}`,
+        first_name: user.first_name,
+        last_name: user.last_name,
         email: user.email,
         age: user.age
     };

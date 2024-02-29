@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authToken, authorization, passportCall } from "../utils.js";
 import passport from "passport";
+import UserDto from "../services/dto/user.dto.js";
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get("/register", (req, res) => {
 // passport.authenticate('jwt', {session: false})
 // authorization("admin")
 router.get("/", passportCall('jwt'), (req,res)=>{
-    res.render('profile.hbs', { user: req.user })
+    res.render('profile.hbs', { user: new UserDto(req.user) })
 });
 
 router.get("/error", (req, res) => {

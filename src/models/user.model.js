@@ -16,7 +16,8 @@ const schema = new mongoose.Schema({
         type: String,
         default: "user",
         enum: ['user', 'admin']
-    }
+    },
+    cart: {type: mongoose.Schema.Types.ObjectId}
 })
 
 const userModel = mongoose.model(collection, schema)

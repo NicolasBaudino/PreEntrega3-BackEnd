@@ -6,10 +6,14 @@ export default class cartRepository {
     createCart = async (cart) => {
       return await this.dao.createCart(cart);
     };
-  
-    getCartByCartId = async (id) => {
+    
+    updateCart = async (_id, cart) => {
+      return await this.dao.updateCart({ _id }, cart);
+    };
+
+    getCartById = async (id) => {
       try {
-        return await this.dao.getCartByCartId(id);
+        return await this.dao.getCartById(id);
       } catch (error) {
         throw new Error(error.message);
       }

@@ -1,6 +1,10 @@
 import { Router } from "express";
 import productDao from "../daos/dbManager/product.dao.js";
 import cartDao from "../daos/dbManager/cart.dao.js";
+import { hasAdminPermission, hasUserPermission } from "../middlewares/permissions.middleware.js";
+import { passportCall } from "../utils.js";
+import { productService } from "../services/service.js";
+
 
 const router = Router();
 router.get("/", (req, res) => {
@@ -29,9 +33,10 @@ router.get("/carts/:id", async (req,res) => {
     res.render("cart.hbs", {products});
 })
 
-router.get("/chat", (req, res) => {
-    res.render("chat.hbs");
+router.get("/chat", passportCall('jwt'), hasUserPermission(), async (req, res) => {
+    res.render("chat", {});
 });
+
 
 
 export default router;
