@@ -1,5 +1,6 @@
 import { cartModel } from "../../../models/cart.model.js";
 import { productModel } from "../../../models/product.model.js";
+import { ticketModel } from "../../../models/ticket.model.js";
 
 export default class cartsDAO {
   constructor () {} 
@@ -147,5 +148,46 @@ export default class cartsDAO {
         throw error;
       }
   }
+
+  purchaseCart = async (cartId, cartProducts, purchaserEmail) => {
+    try {
+      const failedProducts = [];
+      let totalAmount = 0;
+  
+      for (const cartProduct of cartProducts) {
+        const productIdObject = cartProduct._id;
+        const productId = productIdObject.toString()
+        const requestedQuantity = cartProduct.quantity;
+        console.log(productId)
+        const product = await productModel.findById(productId);
+        console.log(product)
+
+        if (product.stock >= requestedQuantity) {
+          totalAmount += product.price * requestedQuantity;
+          product.stock -= requestedQuantity;
+          await product.save();
+        } else {
+          failedProducts.push({ productId, requestedQuantity });
+        }
+      }
+
+      if (totalAmount > 0) {
+        const ticketData = {
+          amount: totalAmount,
+          purchaser: purchaserEmail,
+        };
+  
+        const ticket = await ticketModel.create(ticketData);
+
+        return { failedProducts, ticketId: ticket._id };
+      } else {
+
+        return { failedProducts };
+      }
+    } catch (error) {
+      console.log("Error in purchaseCart function:", error);
+      throw new Error("Error processing the purchase.", error);
+    }
+  };
 }
 

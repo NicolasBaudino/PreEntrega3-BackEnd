@@ -3,7 +3,7 @@
 import { cartService, ticketService, productService } from "../services/service.js";
 import TicketDto from "../services/dto/ticket.dto.js";
 import { cartModel } from "../models/cart.model.js";
-
+import { productModel } from "../models/product.model.js";
 
 export const getCartsController = async (req, res) => {
     try {
@@ -111,35 +111,60 @@ export const deleteProductByCartIdController = async (req, res) => {
     }
 };
 
-export const finishPurchase = async (req,res) =>{
-    const { cid } = req.params;
+// export const finishPurchase = async (req,res) =>{
+//     // const { cid } = req.params;
+//     // try {
+//     //     let cart = await cartService.getCartById(cid)
+
+//     //     let total_price = 0;
+//     //     let unstocked_products = []
+//     //     for(const item of cart.products){
+//     //         let product = await productService.findProductById(item._id.toString())
+//     //         if(product.stock >= item.quantity){
+//     //             total_price += item.quantity * product.price
+//     //             let stockLoweing = await productService.updateProducts(item._id.toString(),{stock:product.stock - item.quantity})
+//     //         }
+//     //         else{
+//     //             unstocked_products.push({product:product._id,quantity:item.quantity})
+//     //         }
+//     //     }
+
+//     //     if(total_price > 0){
+//     //     cart.products = unstocked_products
+//     //     let newCart = await cartService.updateCart(cid, cart)
+//     //     let newTicket = await ticketService.createTicket({code:`${cid}_${Date.now()}`,amount:total_price,purchaser:req.user.email})
+//     //     return res.status(200).json(new TicketDto(newTicket))
+//     //     } 
+//     //     else{
+//     //         return res.status(404).json({message:"No purchase made"})
+//     //     }
+//     // }
+//     // catch (err) {
+//     //     return res.status(404).json({message: err});
+//     // }
+// }
+
+export const finishPurchase = async (req, res) => {
     try {
-        let cart = await cartService.getCartById(cid)
+      const cartId = req.params.cid;
+      const { email } = req.body
 
-        let total_price = 0;
-        let unstocked_products = []
-        for(const item of cart.products){
-            let product = await productService.findProductById(item._id.toString())
-            if(product.stock >= item.quantity){
-                total_price += item.quantity * product.price
-                let stockLoweing = await productService.updateProducts(item._id.toString(),{stock:product.stock - item.quantity})
-            }
-            else{
-                unstocked_products.push({product:product._id,quantity:item.quantity})
-            }
-        }
+      const cartProducts = await cartService.getProductsFromCart(cartId);
 
-        if(total_price > 0){
-        cart.products = unstocked_products
-        let newCart = await cartService.updateCart(cid, cart)
-        let newTicket = await ticketService.createTicket({code:`${cid}_${Date.now()}`,amount:total_price,purchaser:req.user.email})
-        return res.status(200).json(new TicketDto(newTicket))
-        } 
-        else{
-            return res.status(404).json({message:"No purchase made"})
-        }
+      const result = await cartService.purchaseCart(cartId, cartProducts.products, email);
+
+      if (result.failedProducts.length > 0) {
+        await cartService.deleteCart(cartId);
+        res.status(200).json({ 
+          message: "Purchase completed with some products not processed successfully.",
+          failedProducts: result.failedProducts
+        });
+      } else {
+        await cartService.deleteCart(cartId);
+        res.status(200).json({ message: "Purchase completed successfully." });
+      }
+    } catch (error) {
+      console.error("Error in purchaseCart function:", error);
+      res.status(500).json({ error, message: "Error completing the purchase." });
     }
-    catch (err) {
-        return res.status(404).json({message: err});
-    }
-}
+  }

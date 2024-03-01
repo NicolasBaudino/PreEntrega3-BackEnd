@@ -18,6 +18,22 @@ export default class cartRepository {
         throw new Error(error.message);
       }
     };
+
+    getProductsFromCart = async (id) => {
+      try{
+        return await this.dao.getProductsFromCart(id);
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    deleteCart = async (id) => {
+      try{
+        return await this.dao.deleteCart(id);
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }
   
     addProductCart = async (cartId, productId) => {
       try {
@@ -54,6 +70,14 @@ export default class cartRepository {
     deleteProductFromCart = async (cartId, productId) => {
       try {
         return await this.dao.deleteProductFromCart(cartId, productId);
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    };
+
+    purchaseCart = async (cartId, cartProducts, purchaserEmail) => {
+      try {
+        return await this.dao.purchaseCart(cartId, cartProducts, purchaserEmail);
       } catch (error) {
         throw new Error(error.message);
       }
